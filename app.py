@@ -21,9 +21,10 @@ import nltk
 
 
 nltk_data_path = '/opt/render/project/src/nltk_data'
+print(oct(os.stat(nltk_data_path).st_mode)[-3:])
 os.makedirs(nltk_data_path, exist_ok=True)
 nltk.data.path.append(nltk_data_path)
-nltk.download('punkt', download_dir=nltk_data_path)
+nltk.download('punkt', download_dir=nltk_data_path, force=True)
 
 logging.basicConfig(level=logging.DEBUG,  # Change to DEBUG to get detailed logs
                     format='%(asctime)s - %(levelname)s - %(message)s')
