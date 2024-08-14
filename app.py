@@ -34,10 +34,25 @@ app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20 MB
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# def extract_text(loader, file_path):
+#     logging.debug(f"Extracting text from file: {file_path}")
+#     try:
+#         doc = loader(file_path).load()
+#         logging.debug(f"Document loaded successfully: {file_path}")
+#         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50, add_start_index=True)
+#         all_split = text_splitter.split_documents(doc)
+#         logging.debug(f"Text split into {len(all_split)} chunks")
+#         return all_split, doc
+#     except Exception as e:
+#         logging.error(f"Error extracting text from {file_path}: {e}")
+#         return None, f"Error extracting text: {e}"
 def extract_text(loader, file_path):
     logging.debug(f"Extracting text from file: {file_path}")
     try:
         doc = loader(file_path).load()
+        if not doc:
+            logging.error(f"Loaded document is empty or None: {file_path}")
+            return None, "Loaded document is empty or None"
         logging.debug(f"Document loaded successfully: {file_path}")
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50, add_start_index=True)
         all_split = text_splitter.split_documents(doc)
@@ -45,7 +60,9 @@ def extract_text(loader, file_path):
         return all_split, doc
     except Exception as e:
         logging.error(f"Error extracting text from {file_path}: {e}")
-        return None, f"Error extracting text: {e}"
+        return None, f"Error extracting text: {e}"    
+    
+    
 
 def handle_input_file(file):
     file_extension = os.path.splitext(file.filename)[1].lower()
