@@ -15,6 +15,10 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
 import json
 import re
+import logging
+
+logging.basicConfig(level=logging.DEBUG,  # Change to DEBUG to get detailed logs
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 models = "gpt-4o"
 
@@ -30,12 +34,16 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def extract_text(loader, file_path):
+    logging.debug(f"Extracting text from file: {file_path}")
     try:
         doc = loader(file_path).load()
+        logging.debug(f"Document loaded successfully: {file_path}")
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50, add_start_index=True)
         all_split = text_splitter.split_documents(doc)
+        logging.debug(f"Text split into {len(all_split)} chunks")
         return all_split, doc
     except Exception as e:
+        logging.error(f"Error extracting text from {file_path}: {e}")
         return None, f"Error extracting text: {e}"
 
 def handle_input_file(file):
@@ -93,13 +101,16 @@ def handle_file_size_error(e):
 
 @app.route('/upload-document', methods=['POST'])
 def upload_document():
+    logging.debug("Starting upload_document function.")
     # Ensure OPENAI_API_KEY is set
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     if not OPENAI_API_KEY:
         raise ValueError("The OPENAI_API_KEY environment variable is not set. Please set it in your environment.")
+    logging.debug(f"OPENAI_API_KEY: {OPENAI_API_KEY}")
 
     os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
     if 'file' not in request.files:
+        logging.error('No file part in request.')
         return jsonify({'Message': 'No file part'}), 400
 
     file = request.files['file']
@@ -175,6 +186,8 @@ Instructions:
 {context}
 </context>
 """
+        # Construct prompt template
+        logging.debug('Constructing prompt template.')
         if question:
             custom_rag_prompt = PromptTemplate.from_template(template_with_question_for_insights)
         else:
