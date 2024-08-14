@@ -60,7 +60,7 @@ def extract_text(loader, file_path):
         return all_split, doc
     except Exception as e:
         logging.error(f"Error extracting text from {file_path}: {e}")
-        return None, f"Error extracting text: {e}"    
+        return None, f"Error extracting text from {file_path}: {e}"    
     
     
 
