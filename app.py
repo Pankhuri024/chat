@@ -20,15 +20,10 @@ import nltk
 
 
 
-# Set the path where NLTK data will be stored
-nltk_data_directory = os.path.join(os.getcwd(), 'nltk_data')
-os.makedirs(nltk_data_directory, exist_ok=True)
-
-# Append the path to NLTK's data paths
-nltk.data.path.append(nltk_data_directory)
-
-# Download the 'punkt' tokenizer data
-nltk.download('punkt', download_dir=nltk_data_directory)
+nltk_data_path = '/opt/render/project/src/nltk_data'
+os.makedirs(nltk_data_path, exist_ok=True)
+nltk.data.path.append(nltk_data_path)
+nltk.download('punkt', download_dir=nltk_data_path)
 
 logging.basicConfig(level=logging.DEBUG,  # Change to DEBUG to get detailed logs
                     format='%(asctime)s - %(levelname)s - %(message)s')
