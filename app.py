@@ -66,7 +66,6 @@ Instructions:
 2. Do not introduce new elements or information not present in the context.
 3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please ask a different question."
 4. Ensure the response does not mention ChatGPT or OpenAI.
-5. The insights can be up to 15. For example, if there are only two insights available, then generate two insights. If there are ten insights, generate ten insights. The insights should be in order: Insight1, Insight2......Insight15.
 
 <context>
 {context}
