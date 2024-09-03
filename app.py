@@ -1,72 +1,104 @@
-from flask import Flask, jsonify, request
 import os
-import logging
-from langchain_openai import ChatOpenAI
+from flask import Flask, request, jsonify, Response
+from dotenv import load_dotenv
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+import json
+import logging
+import re
+
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+models = "gpt-4o"
+
+load_dotenv()
+
+ALLOWED_IP_ADDRESSES = {"127.0.0.1", "171.50.226.59"}  # Add allowed IP addresses here
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20 MB
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+def extract_number(key):
+    match = re.search(r'\d+', key)
+    return int(match.group()) if match else 0
 
-@app.route('/api/send-text', methods=['POST'])
-def receive_text():
-    logging.debug("Starting receive_text function.")
-    
+@app.errorhandler(413)
+def handle_file_size_error(e):
+    return jsonify({
+        'Message': 'Request entity too large'
+    }), 413
+
+@app.route('/ask-question', methods=['POST'])
+def ask_question():
+    logging.debug("Starting ask_question function.")
     # Ensure OPENAI_API_KEY is set
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     if not OPENAI_API_KEY:
-        logging.error("OPENAI_API_KEY environment variable is not set.")
         raise ValueError("The OPENAI_API_KEY environment variable is not set. Please set it in your environment.")
     logging.debug(f"OPENAI_API_KEY: {OPENAI_API_KEY}")
+
+    os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
     
-    data = request.get_json()
-    question = data.get('text', '')
-    
+    question = request.json.get('question', '')
+
     if not question:
-        return jsonify({'message': 'Invalid text'}), 400
+        return jsonify({'Message': 'No question provided'}), 400
 
     try:
-        # Initialize OpenAI model
-        selected_model = 'gpt-3.5-turbo'  # Example model, adjust as needed
+        # Initialize components for a fresh session
+        selected_model = models
         llm = ChatOpenAI(model=selected_model)
-        
-        # Define your template
-        template = """Analyze the content of the provided text and generate insights. you should include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without 'json' heading, with each insight structured as follows and {input}:
 
-        - Insight:
-          - Summary: Insight summary here
-          - Description: Detailed insight description here
+        # Template for generating insights based on question input
+        template_for_insights = """
+Analyze the question provided and generate insights. Each insight should include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without 'json' heading, with each insight structured as follows:
 
-        Instructions:
-        1. Base your response solely on the content within the provided text.
-        2. Do not introduce new elements or information not present in the text.
-        3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please send a different text."
-        4. Ensure the response does not mention ChatGPT or OpenAI.
-        """
-        
-        # Construct prompt using the template and the question
-        prompt = template.format(input=question)
-        
-        # Send the prompt to the model
-        response = llm(prompt)
+- Insight:
+  - Summary: Insight summary here
+  - Description: Detailed insight description here
 
-        response_text = response['choices'][0]['message']['content'] if 'choices' in response else str(response)
+Instructions:
+1. Base your response solely on the content within the provided question.
+2. Do not introduce new elements or information not present in the context.
+3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please ask a different question."
+4. Ensure the response does not mention ChatGPT or OpenAI.
+"""
+        # Construct prompt template
+        logging.debug('Constructing prompt template.')
+        custom_rag_prompt = PromptTemplate.from_template(template_for_insights)
+
+        document_chain = create_stuff_documents_chain(llm, custom_rag_prompt)
+        response = document_chain.invoke({"input": question, "context": question})
         
-        # Extract the JSON part of the response
-        start_index = response_text.find('{')
-        end_index = response_text.rfind('}') + 1
-        json_content = response_text[start_index:end_index]
-        
-        # Parse JSON and extract insights
-        parsed_response = json.loads(json_content)
-        insights = parsed_response.get('insights', [])
-        
-        return jsonify({'question': question, 'insights': insights, 'message': 'Text received successfully'})
-    
+        try:
+            # Load the data from the JSON response
+            data = json.loads(response["answer"])
+
+            # Order the dictionary by its keys
+            ordered_data = dict(sorted(data.items(), key=lambda item: extract_number(item[0])))
+
+            # Convert the ordered dictionary back to JSON format
+            ordered_data = json.dumps(ordered_data, indent=4)
+        except json.JSONDecodeError:
+            return jsonify({"Message": "Failed to decode JSON response from LLM"}), 500
+
+        if not data:
+            return jsonify({"Message": "There is no insight found. Please ask a different question"}), 200
+
+        # Clear variables to avoid retention of previous data
+        del llm
+        del document_chain
+        del response
+        del selected_model
+
+        # Return response
+        return Response(ordered_data, content_type='application/json'), 200
     except Exception as e:
-        logging.error(f"Error processing text: {e}")
-        return jsonify({'message': 'Error processing text'}), 500
+        return jsonify({"Message": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0")
