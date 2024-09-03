@@ -50,8 +50,11 @@ def receive_text():
         
         # Send the prompt to the model
         response = llm(prompt)
-        
-        return jsonify({'question': question, 'response': response, 'message': 'Text received successfully'})
+
+        # Convert the AI response to a JSON-serializable format
+        response_text = response['choices'][0]['message']['content'] if 'choices' in response else str(response)
+
+        return jsonify({'question': question, 'response': response_text, 'message': 'Text received successfully'})
     
     except Exception as e:
         logging.error(f"Error processing text: {e}")
