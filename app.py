@@ -9,7 +9,6 @@ import json
 import logging
 import re
 
-
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -67,12 +66,15 @@ Instructions:
 3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please ask a different question."
 4. Ensure the response does not mention ChatGPT or OpenAI.
 """
-        # Construct prompt template
+        # Construct prompt template with input variable
         logging.debug('Constructing prompt template.')
-        custom_rag_prompt = PromptTemplate.from_template(template_for_insights)
+        custom_rag_prompt = PromptTemplate(template=template_for_insights, input_variables=["context"])
 
+        # Create the document chain using the prompt template
         document_chain = create_stuff_documents_chain(llm, custom_rag_prompt)
-        response = document_chain.invoke({"input": question, "context": question})
+
+        # Call the document chain with the correct inputs
+        response = document_chain.invoke({"context": question})
         
         try:
             # Load the data from the JSON response
