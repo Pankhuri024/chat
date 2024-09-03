@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/ask-question', methods=['POST'])
 def ask_question():
-    logging.debug("Starting receive_text function.")
+    logging.debug("Starting ask_question function.")
     
     # Ensure OPENAI_API_KEY is set
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -57,14 +57,13 @@ def ask_question():
         # Convert the AI response to a string and extract only the "insights" part
         response_text = response['choices'][0]['message']['content'] if 'choices' in response else str(response)
         
-        # Extract the JSON part of the response
-        start_index = response_text.find('{')
-        end_index = response_text.rfind('}') + 1
-        json_content = response_text[start_index:end_index]
-        
-        # Parse JSON and prepare the response structure
-        parsed_response = json.loads(json_content)
-        insights = parsed_response.get('insights', [])
+        # Attempt to parse the response as JSON
+        try:
+            parsed_response = json.loads(response_text)
+            insights = parsed_response.get('insights', [])
+        except json.JSONDecodeError:
+            logging.error(f"Error decoding JSON from response: {response_text}")
+            return jsonify({'message': 'Invalid JSON response from the model'}), 500
         
         # Prepare formatted insights output
         formatted_insights = {}
@@ -82,6 +81,8 @@ def ask_question():
             return jsonify({'message': 'Quota exceeded. Please check your OpenAI plan and billing details.'}), 429
         logging.error(f"Error processing text: {e}")
         return jsonify({'message': 'Error processing text'}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
