@@ -11,7 +11,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/ask-question', methods=['POST'])
-def receive_text():
+def ask_question():
     logging.debug("Starting receive_text function.")
     
     # Ensure OPENAI_API_KEY is set
