@@ -43,9 +43,6 @@ def receive_text():
         2. Do not introduce new elements or information not present in the text.
         3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please send a different text."
         4. Ensure the response does not mention ChatGPT or OpenAI.
-        <context>
-        {context}
-        </context>
         """
         
         # Construct prompt using the template and the question
