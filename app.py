@@ -17,11 +17,9 @@ def receive_text():
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     if not OPENAI_API_KEY:
         logging.error("OPENAI_API_KEY environment variable is not set.")
-        return jsonify({'message': 'OPENAI_API_KEY environment variable is not set.'}), 500
-    
-    os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+        raise ValueError("The OPENAI_API_KEY environment variable is not set. Please set it in your environment.")
     logging.debug(f"OPENAI_API_KEY: {OPENAI_API_KEY}")
-
+    
     data = request.get_json()
     question = data.get('text', '')
     
@@ -29,27 +27,34 @@ def receive_text():
         return jsonify({'message': 'Invalid text'}), 400
 
     try:
-        # Initialize the language model
-        selected_model = 'gpt-3.5-turbo'  # Model to use
+        # Initialize OpenAI model
+        selected_model = 'gpt-3.5-turbo'  # Example model, adjust as needed
         llm = ChatOpenAI(model=selected_model)
+        
+        # Define your template
+        template = """Analyze the content of the provided text and generate insights. you should include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without 'json' heading, with each insight structured as follows and {input}:
 
-        # Define a prompt template
-        template = """
-        You will receive a question and you should respond to it based on the provided context:
+        - Insight:
+          - Summary: Insight summary here
+          - Description: Detailed insight description here
 
-        Question: {input}
-
-        Please provide a detailed answer that covers all aspects of the question.
+        Instructions:
+        1. Base your response solely on the content within the provided text.
+        2. Do not introduce new elements or information not present in the text.
+        3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please send a different text."
+        4. Ensure the response does not mention ChatGPT or OpenAI.
+        <context>
+        {context}
+        </context>
         """
-        custom_prompt = PromptTemplate.from_template(template)
-
-        # Use the model to generate a response
-        prompt_text = custom_prompt.render({"input": question})
-        logging.debug(f"Generated prompt for model: {prompt_text}")
-
-        response = llm.invoke({"prompt": prompt_text})
-
-        return jsonify({'question': question, 'response': response, 'message': 'Text processed successfully'})
+        
+        # Construct prompt using the template and the question
+        prompt = template.format(input=question)
+        
+        # Send the prompt to the model
+        response = llm(prompt)
+        
+        return jsonify({'question': question, 'response': response, 'message': 'Text received successfully'})
     
     except Exception as e:
         logging.error(f"Error processing text: {e}")
