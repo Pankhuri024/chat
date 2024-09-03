@@ -9,6 +9,7 @@ import json
 import logging
 import re
 
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -56,7 +57,7 @@ def ask_question():
         template_for_insights = """
 Analyze the question provided and generate insights. Each insight should include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without 'json' heading, with each insight structured as follows:
 
-- Insight:
+- Insight1:
   - Summary: Insight summary here
   - Description: Detailed insight description here
 
@@ -65,16 +66,18 @@ Instructions:
 2. Do not introduce new elements or information not present in the context.
 3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please ask a different question."
 4. Ensure the response does not mention ChatGPT or OpenAI.
+5. The insights can be up to 15. For example, if there are only two insights available, then generate two insights. If there are ten insights, generate ten insights. The insights should be in order: Insight1, Insight2......Insight15.
+
+<context>
+{context}
+</context>
 """
-        # Construct prompt template with input variable
+        # Construct prompt template
         logging.debug('Constructing prompt template.')
-        custom_rag_prompt = PromptTemplate(template=template_for_insights, input_variables=["context"])
+        custom_rag_prompt = PromptTemplate.from_template(template_for_insights)
 
-        # Create the document chain using the prompt template
         document_chain = create_stuff_documents_chain(llm, custom_rag_prompt)
-
-        # Call the document chain with the correct inputs
-        response = document_chain.invoke({"context": question})
+        response = document_chain.invoke({"input": question, "context": question})
         
         try:
             # Load the data from the JSON response
