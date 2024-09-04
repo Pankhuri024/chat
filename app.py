@@ -56,7 +56,7 @@ Instructions:
         response_text = response['choices'][0]['message']['content'] if 'choices' in response else str(response)
 
         # Return the response text directly
-        return Response(response_text.get('Insights', ''), mimetype='application/json')
+        return Response(response_text, mimetype='application/json')
     
     except Exception as e:
         if "insufficient_quota" in str(e):
