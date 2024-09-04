@@ -61,7 +61,8 @@ Instructions:
         # Parse the response text as JSON
         try:
              response_json = json.loads(response_text)
-            insights = response_text.get('Insights', [])
+             logging.debug(f"Raw model response_json: {response_json}")
+            insights = response_json.get('Insights', [])
             insights_json = json.dumps(insights, indent=2)
         except json.JSONDecodeError:
             insights_json = '{"message": "Error parsing response as JSON."}'
