@@ -56,11 +56,11 @@ Instructions:
         # Extract the AI response
         response_text = response['choices'][0]['message']['content'] if 'choices' in response else str(response)
         
-        logging.debug(f"Raw model response: {response_text}")
+        logging.debug(f"Raw model response: {response}")
         
         # Parse the response text as JSON
         try:
-            # response_json = json.loads(response_text)
+             response_json = json.loads(response_text)
             insights = response_text.get('Insights', [])
             insights_json = json.dumps(insights, indent=2)
         except json.JSONDecodeError:
