@@ -54,18 +54,28 @@ Instructions:
         response = llm(prompt)
         
         # Extract the AI response
-        response_text = response['choices'][0]['message']['content'] if 'choices' in response else str(response)
+         response_text = response['choices'][0]['message']['content'] if 'choices' in response else str(response)
         
-        logging.debug(f"Raw model response: {response}")
+        logging.debug(f"Raw model response: {response_text}")
         
         # Parse the response text as JSON
         try:
-             response_json = json.loads(response_text)
-             logging.debug(f"Raw model response_json: {response_json}")
+            response_json = json.loads(response_text)
+            logging.debug(f"Raw model response_json: {response_json}")
+            
+            # Extract 'Insights' from the JSON response
             insights = response_json.get('Insights', [])
-            insights_json = json.dumps(insights, indent=2)
+            if not insights:
+                # If no insights are found, return a message
+                insights_json = '{"message": "There is no insight found. Please send a different text."}'
+            else:
+                # Return the insights as a JSON response
+                insights_json = json.dumps(insights, indent=2)
+                
         except json.JSONDecodeError:
+            logging.error(f"Error parsing response as JSON: {response_text}")
             insights_json = '{"message": "Error parsing response as JSON."}'
+        
         # Return the insights as a JSON response
         return Response(insights_json, mimetype='application/json')
     
