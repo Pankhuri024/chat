@@ -60,11 +60,10 @@ Instructions:
         
         # Parse the response text as JSON
         try:
-            response_json = json.loads(response_text)
-            insights = response_json.get('Insights', [])
+            # response_json = json.loads(response_text)
+            insights = response_text.get('Insights', [])
             insights_json = json.dumps(insights, indent=2)
         except json.JSONDecodeError:
-            logging.error(f"Error insights as JSON: {insights_json}")
             insights_json = '{"message": "Error parsing response as JSON."}'
         # Return the insights as a JSON response
         return Response(insights_json, mimetype='application/json')
