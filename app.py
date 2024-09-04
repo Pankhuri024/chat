@@ -6,6 +6,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain.schema import Document  # Import Document schema
 
 logging.basicConfig(level=logging.DEBUG,  # Change to DEBUG to get detailed logs
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -59,7 +60,10 @@ Instructions:
         custom_rag_prompt = PromptTemplate.from_template(template_for_insights)
         document_chain = create_stuff_documents_chain(llm, custom_rag_prompt)
         
-        response = document_chain.invoke({"context": question})
+        # Wrap the question in a Document object
+        document = Document(page_content=question)
+
+        response = document_chain.invoke({"context": document})
         
         return jsonify({"Answer": response['answer']}), 200
     except Exception as e:
