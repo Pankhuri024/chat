@@ -51,16 +51,15 @@ Instructions:
 2. Do not introduce new elements or information not present in the text.
 3. If there is no insight, generate the response with the message: "Message": "There is no insight found. Please send a different text."
 4. Ensure the response does not mention ChatGPT or OpenAI.
-{input}
-"""
-
+{context}
+        """
 
         # Construct prompt template
         logging.debug('Constructing prompt template.')
         custom_rag_prompt = PromptTemplate.from_template(template_for_insights)
         document_chain = create_stuff_documents_chain(llm, custom_rag_prompt)
         
-        response = document_chain.invoke({"input": question})
+        response = document_chain.invoke({"context": question})
         
         return jsonify({"Answer": response['answer']}), 200
     except Exception as e:
