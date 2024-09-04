@@ -35,7 +35,10 @@ def ask_question():
         template = """
 Analyze the content of the provided question and generate insights. Include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without a 'json' heading, with each insight structured as follows and based on the provided input:
 
-- Insight:
+- Insight1:
+  - Summary: Insight summary here
+  - Description: Detailed insight description here
+- Insight2:
   - Summary: Insight summary here
   - Description: Detailed insight description here
 
@@ -44,7 +47,8 @@ Instructions:
 2. Do not introduce new elements or information not present in the question.
 3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please send a different question."
 4. Ensure the response does not mention ChatGPT or OpenAI.
-5. always all Insight inside to Insights.
+5. All insights should be within a array of object labeled Insights. Inside this single object, each insight should be labeled as Insight1, Insight2, etc., with its respective Summary and Description fields.
+6. If a specific number is mentioned in the question, that exact number of insights should be generated; otherwise, generate insights as appropriate.
 {input}
         """
 
