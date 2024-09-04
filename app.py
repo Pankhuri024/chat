@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 import os
 import logging
+import json
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 
@@ -53,14 +54,17 @@ def receive_text():
         # Send the prompt to the model
         response = llm(prompt)
         
-        # Extract 'Insights' from the response
-        insights = response.get('content', '{}')
+        # Extract 'content' from the response
+        content = response['content'] if hasattr(response, 'content') else ''
+        
+        # Convert 'content' to JSON format
         try:
-            insights_json = json.loads(insights)  # Convert string to dictionary
+            insights_json = json.loads(content)
         except json.JSONDecodeError as e:
             logging.error(f"JSON Decode Error: {e}")
             return jsonify({'message': 'Error decoding JSON response'}), 500
         
+        # Extract 'Insights' from the parsed JSON
         insights_result = insights_json.get('Insights', {})
         
         return jsonify(insights_result)
