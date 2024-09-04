@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request
 import os
 import logging
 from langchain_openai import ChatOpenAI
@@ -19,10 +19,13 @@ def receive_text():
         logging.error("OPENAI_API_KEY environment variable is not set.")
         return jsonify({'message': 'OPENAI_API_KEY environment variable is not set.'}), 500
     
+    os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+    logging.debug(f"OPENAI_API_KEY: {OPENAI_API_KEY}")
+
     data = request.get_json()
-    text = data.get('text', '')
+    question = data.get('text', '')
     
-    if not text:
+    if not question:
         return jsonify({'message': 'Invalid text'}), 400
 
     try:
@@ -31,32 +34,36 @@ def receive_text():
         llm = ChatOpenAI(model=selected_model)
         
         # Define your template
-        template = """
-Analyze the content of the provided text and generate insights. Include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without a 'json' heading, with each insight structured as follows and based on the provided input:
+        template = """Analyze the content of the provided text and generate insights. Include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without 'json' heading, with each insight structured as follows and {input}:
 
-- Insight:
-  - Summary: Insight summary here
-  - Description: Detailed insight description here
+        - Insight:
+          - Summary: Insight summary here
+          - Description: Detailed insight description here
 
-Instructions:
-1. Base your response solely on the content within the provided text.
-2. Do not introduce new elements or information not present in the text.
-3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please send a different text."
-4. Ensure the response does not mention ChatGPT or OpenAI.
-{input}
+        Instructions:
+        1. Base your response solely on the content within the provided text.
+        2. Do not introduce new elements or information not present in the text.
+        3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please send a different text."
+        4. Ensure the response does not mention ChatGPT or OpenAI.
         """
         
-        # Construct prompt using the template and the text
-        prompt = template.format(input=text)
+        # Construct prompt using the template and the question
+        prompt = template.format(input=question)
         
         # Send the prompt to the model
         response = llm(prompt)
         
-        # Extract the AI response
-        response_text = response['choices'][0]['message']['content'] if 'choices' in response else str(response)
-
-        # Return the response text directly
-        return Response(response_text, mimetype='application/json')
+        # Extract 'Insights' from the response
+        insights = response.get('content', '{}')
+        try:
+            insights_json = json.loads(insights)  # Convert string to dictionary
+        except json.JSONDecodeError as e:
+            logging.error(f"JSON Decode Error: {e}")
+            return jsonify({'message': 'Error decoding JSON response'}), 500
+        
+        insights_result = insights_json.get('Insights', {})
+        
+        return jsonify(insights_result)
     
     except Exception as e:
         if "insufficient_quota" in str(e):
