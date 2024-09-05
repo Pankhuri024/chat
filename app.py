@@ -155,11 +155,11 @@ def upload_document():
   - Description: Detailed insight description here
 
 Instructions:
-1. Base your response solely on the content within the provided context.
-2. Do not introduce new elements or information not present in the context.
-3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please upload a different document."
-4. Ensure the response does not mention ChatGPT or OpenAI.
-5. If there are insights found under the "Insights" heading, Generate one insight per paragraph or item.
+1. If the "Insights" heading is found in the provided context, generate one insight for each paragraph or item under it.
+2. Base your response solely on the content within the provided context.
+3. Do not introduce new elements or information not present in the context.
+4. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please upload a different document."
+5. Ensure the response does not mention ChatGPT or OpenAI.
 6. If there are no insights found under the "Insights" heading, The insights can be up to 15. For example, if there are only two insights available in the document, then generate two insights. If there are ten insights, generate ten insights. The insights should be in order: Insight1, Insight2......Insight15.
 
 <context>
@@ -182,11 +182,11 @@ Analyze the content of the provided file  and generate up to 15 insights. Each i
   - Description: Detailed insight description here
 
 Instructions:
-1. Base your response solely on the content within the provided context.
-2. Do not introduce new elements or information not present in the context.
-3. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please upload a different document."
-4. Ensure the response does not mention ChatGPT or OpenAI.
-5. If there are insights found under the "Insights" heading, Generate one insight per paragraph or item.
+1. If the "Insights" heading is found in the provided context, generate one insight for each paragraph or item under it.
+2. Base your response solely on the content within the provided context.
+3. Do not introduce new elements or information not present in the context.
+4. If there is no insight, generate the response without JSON header with the message: "Message": "There is no insight found. Please upload a different document."
+5. Ensure the response does not mention ChatGPT or OpenAI.
 6. If there are no insights found under the "Insights" heading, The insights can be up to 15. For example, if there are only two insights available in the document, then generate two insights. If there are ten insights, generate ten insights. The insights should be in order: Insight1, Insight2......Insight15.
 
 <context>
