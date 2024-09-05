@@ -153,7 +153,7 @@ Analyze the content of the provided file and generate insights. Each insight sho
 
 
 Instructions:
-1. If the "Insights" heading is found in the provided context, generate one insight for each paragraph or item under it.
+1. If the "Insights" heading is found in the provided context, generate one insight for each paragraph under it.
 2. If there are no insights found under the "Insights" heading, The insights can be up to 15. For example, if there are only two insights available in the document, then generate two insights. If there are ten insights, generate ten insights. The insights should be in order: Insight1, Insight2......Insight15.
 3. Base your response solely on the content within the provided context.
 4. Do not introduce new elements or information not present in the context.
@@ -177,7 +177,7 @@ Analyze the content of the provided file and generate insights. Each insight sho
 
 
 Instructions:
-1. If the "Insights" heading is found in the provided context, generate one insight for each paragraph or item under it.
+1. If the "Insights" heading is found in the provided context, generate one insight for each paragraph under it.
 2. If there are no insights found under the "Insights" heading, The insights can be up to 15. For example, if there are only two insights available in the document, then generate two insights. If there are ten insights, generate ten insights. The insights should be in order: Insight1, Insight2......Insight15.
 3. Base your response solely on the content within the provided context.
 4. Do not introduce new elements or information not present in the context.
