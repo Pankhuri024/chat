@@ -156,11 +156,14 @@ Analyze the content of the provided file and generate up to 15 insights. If the 
   - Description: Detailed insight description here
 
 Instructions:
+If "Insights" heading is present:
   1. If there are subheadings under the "Insights" heading, extract insights based only on the paragraphs under each subheading.
   2. If there are no subheadings under "Insights," use all paragraphs under the "Insights" heading to generate insights.
   3. Generate insights corresponding to each relevant paragraph. For example, if there are two paragraphs under a subheading, generate Insight1 and Insight2. If there are ten paragraphs in total, generate Insight1 to Insight10.
   4. Base your response solely on the content of these paragraphs.
   5. Ensure the response does not mention ChatGPT or OpenAI.
+
+If no "Insights" heading is present:
   1. Base your response solely on the entire content within the provided context.
   2. Do not introduce new elements or information not present in the context.
   3. If no insights are found, generate the response with the message: "Message": "There is no insight found. Please upload a different document."
