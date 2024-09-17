@@ -142,7 +142,7 @@ def upload_document():
         vectorstore = Chroma.from_documents(documents=all_splits, embedding=OpenAIEmbeddings())
 
         template_with_question_for_insights = """
-Analyze the content of the provided file and generate up to 15 insights. If the file contains a heading "Insights," generate insights based on the paragraphs under that heading. If there is no "Insights" heading, generate insights based on the entire content. Each insight should include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without a 'json' heading, with each insight structured as follows and {input}:
+Analyze the content of the provided file and generate up to 15 insights.Each insight should include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format, with each insight structured as follows or {input}
 
 - Insight1:
   - Summary: Insight summary here
@@ -156,26 +156,26 @@ Analyze the content of the provided file and generate up to 15 insights. If the 
   - Description: Detailed insight description here
 
 Instructions:
-If "Insights" heading is present:
-  1. If there are subheadings under the "Insights" heading, extract insights based only on the paragraphs under each subheading.
-  2. If there are no subheadings under "Insights," use all paragraphs under the "Insights" heading to generate insights.
-  3. Generate insights corresponding to each relevant paragraph. For example, if there are two paragraphs under a subheading, generate Insight1 and Insight2. If there are ten paragraphs in total, generate Insight1 to Insight10.
-  4. Base your response solely on the content of these paragraphs.
-  5. Ensure the response does not mention ChatGPT or OpenAI.
 
-If no "Insights" heading is present:
-  1. Base your response solely on the entire content within the provided context.
-  2. Do not introduce new elements or information not present in the context.
-  3. If no insights are found, generate the response with the message: "Message": "There is no insight found. Please upload a different document."
-  4. Ensure the response does not mention ChatGPT or OpenAI.
-  5. The insights can be up to 15. For example, if there are only two insights available in the document, generate two insights. If there are ten insights, generate ten insights. The insights should be in order: Insight1, Insight2, ..., Insight15.
+1. Heading Detection: If the file contains a heading labeled "Insights" or "Insight," generate insights based on the paragraphs directly beneath that heading.
+
+2. Insight Generation: For each relevant paragraph under the heading, generate a corresponding insight. For instance, if there are two paragraphs under the heading, generate Insight1 and Insight2. If there are ten paragraphs, generate Insight1 to Insight10.
+
+3. Content-Based Response: Base your response solely on the content within the provided context. Do not introduce new information or elements that are not present in the context.
+
+4. Exclusivity: Ensure that the response does not include any mention of ChatGPT or OpenAI.
+
+5. No Insights Case: If no insights are found, generate a response without a JSON header with the message: "Message": "There is no insight found. Please upload a different document."
+
+6. Insight Count: The insights should be up to a maximum of 15. For example, if there are only two insights in the document, generate Insight1 and Insight2. If there are ten insights, generate Insight1 to Insight10, and so on, up to Insight15 if applicable.
+
 <context>
 {context}
 </context>
 """
 
         template_without_question_for_insights = """
-Analyze the content of the provided file and generate up to 15 insights. If the file contains a heading "Insights," generate insights based on the paragraphs under that heading. If there is no "Insights" heading, generate insights based on the entire content. Each insight should include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format without a 'json' heading, with each insight structured as follows:
+Analyze the content of the provided file and generate up to 15 insights.Each insight should include a summary (200 characters) and a detailed description (1500 characters). Output the response in JSON format, with each insight structured as follows:
 
 - Insight1:
   - Summary: Insight summary here
@@ -189,19 +189,18 @@ Analyze the content of the provided file and generate up to 15 insights. If the 
   - Description: Detailed insight description here
 
 Instructions:
-If "Insights" heading is present:
-  1. If there are subheadings under the "Insights" heading, extract insights based only on the paragraphs under each subheading.
-  2. If there are no subheadings under "Insights," use all paragraphs under the "Insights" heading to generate insights.
-  3. Generate insights corresponding to each relevant paragraph. For example, if there are two paragraphs under a subheading, generate Insight1 and Insight2. If there are ten paragraphs in total, generate Insight1 to Insight10.
-  4. Base your response solely on the content of these paragraphs.
-  5. Ensure the response does not mention ChatGPT or OpenAI.
 
-If no "Insights" heading is present:
-  1. Base your response solely on the entire content within the provided context.
-  2. Do not introduce new elements or information not present in the context.
-  3. If no insights are found, generate the response with the message: "Message": "There is no insight found. Please upload a different document."
-  4. Ensure the response does not mention ChatGPT or OpenAI.
-  5. The insights can be up to 15. For example, if there are only two insights available in the document, generate two insights. If there are ten insights, generate ten insights. The insights should be in order: Insight1, Insight2, ..., Insight15.
+1. Heading Detection: If the file contains a heading labeled "Insights" or "Insight," generate insights based on the paragraphs directly beneath that heading.
+
+2. Insight Generation: For each relevant paragraph under the heading, generate a corresponding insight. For instance, if there are two paragraphs under the heading, generate Insight1 and Insight2. If there are ten paragraphs, generate Insight1 to Insight10.
+
+3. Content-Based Response: Base your response solely on the content within the provided context. Do not introduce new information or elements that are not present in the context.
+
+4. Exclusivity: Ensure that the response does not include any mention of ChatGPT or OpenAI.
+
+5. No Insights Case: If no insights are found, generate a response without a JSON header with the message: "Message": "There is no insight found. Please upload a different document."
+
+6. Insight Count: The insights should be up to a maximum of 15. For example, if there are only two insights in the document, generate Insight1 and Insight2. If there are ten insights, generate Insight1 to Insight10, and so on, up to Insight15 if applicable.
 
 <context>
 {context}
